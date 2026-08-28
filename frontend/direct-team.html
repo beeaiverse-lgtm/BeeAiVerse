@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>My Team - Bee AI Verse</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="css/style.css" />
+<style>
+  /* ── Tab bar ── */
+  .team-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 22px;
+  }
+  .team-tab {
+    padding: 10px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.18s, border-color 0.18s;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .team-tab:hover { color: var(--ice); }
+  .team-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .tab-count {
+    background: rgba(255,201,60,0.15);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 20px;
+  }
+  .team-tab.active .tab-count { background: rgba(255,201,60,0.25); }
+
+  /* ── Summary stat cards ── */
+  .team-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .team-stat {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .team-stat .val {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1.2;
+  }
+  .team-stat .lbl {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ── Level filter chips (indirect tab) ── */
+  .level-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 16px;
+  }
+  .chip {
+    padding: 4px 13px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: rgba(255,255,255,0.04);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--ice); }
+  .chip.active {
+    background: rgba(255,201,60,0.15);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ── Search bar ── */
+  .team-toolbar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .team-toolbar input {
+    flex: 1;
+    min-width: 180px;
+    margin: 0;
+  }
+
+  /* ── Level badge ── */
+  .level-badge {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.03em;
+    background: rgba(255,201,60,0.12);
+    color: var(--accent);
+    border: 1px solid rgba(255,201,60,0.25);
+  }
+
+  /* ── Sponsor ref ── */
+  .sponsor-ref {
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  /* ── Empty / loading ── */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+  }
+  .empty-state .icon { font-size: 36px; margin-bottom: 10px; }
+
+  @media (max-width: 600px) {
+    .team-tab { padding: 9px 13px; font-size: 13px; }
+    .team-stat .val { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="app-layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main-content">
+    <div class="page-header">
+      <h1>My Team</h1>
+      <p>View your direct referrals and full downline network.</p>
+    </div>
+
+    <!-- Summary stats -->
+    <div class="team-stats" id="teamStats">
+      <div class="team-stat"><div class="val" id="statDirect">—</div><div class="lbl">Direct Members</div></div>
+      <div class="team-stat"><div class="val" id="statIndirect">—</div><div class="lbl">Indirect Members</div></div>
+      <div class="team-stat"><div class="val" id="statTotal">—</div><div class="lbl">Total Downline</div></div>
+      <div class="team-stat"><div class="val" id="statDepth">—</div><div class="lbl">Max Depth (Level)</div></div>
+      <div class="team-stat"><div class="val" id="statActive">—</div><div class="lbl">Active Members</div></div>
+    </div>
+
+    <div class="panel">
+      <!-- Tabs -->
+      <div class="team-tabs">
+        <button class="team-tab active" id="tabDirect" onclick="switchTab('direct')">
+          👥 Direct Team <span class="tab-count" id="cntDirect">0</span>
+        </button>
+        <button class="team-tab" id="tabIndirect" onclick="switchTab('indirect')">
+          🌐 Indirect / Downline <span class="tab-count" id="cntIndirect">0</span>
+        </button>
+      </div>
+
+      <!-- ── DIRECT TEAM PANEL ── -->
+      <div id="panelDirect">
+        <div class="team-toolbar">
+          <input type="text" id="searchDirect" placeholder="Search name, ID or email…" oninput="filterDirect()" />
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Member ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Position</th>
+                <th>Wallet</th>
+                <th>Status</th>
+                <th>Joined</th>
+              </tr>
+            </thead>
+            <tbody id="directBody"><tr><td colspan="8" class="empty-state">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── INDIRECT TEAM PANEL ── -->
+      <div id="panelIndirect" style="display:none">
+        <div class="team-toolbar">
+          <input type="text" id="searchIndirect" placeholder="Search name, ID, email or sponsor…" oninput="filterIndirect()" />
+        </div>
+        <!-- Level filter chips rendered dynamically -->
+        <div class="level-chips" id="levelChips"></div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Level</th>
+                <th>Member ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Referred By</th>
+                <th>Wallet</th>
+                <th>Status</th>
+                <th>Joined</th>
+              </tr>
+            </thead>
+            <tbody id="indirectBody"><tr><td colspan="9" class="empty-state">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/sidebar.js"></script>
+<script>
+requireAuth();
+renderSidebar('direct-team', 'user');
+
+let directData   = [];
+let indirectData = [];
+let activeLevel  = 'all'; // 'all' or a number string
+
+// ── Tab switching ──
+function switchTab(tab) {
+  document.getElementById('panelDirect').style.display   = tab === 'direct'   ? '' : 'none';
+  document.getElementById('panelIndirect').style.display = tab === 'indirect' ? '' : 'none';
+  document.getElementById('tabDirect').classList.toggle('active',   tab === 'direct');
+  document.getElementById('tabIndirect').classList.toggle('active', tab === 'indirect');
+}
+
+// ── Render summary stats ──
+function renderStats() {
+  const total  = directData.length + indirectData.length;
+  const active = [...directData, ...indirectData].filter(r => r.status === 'active').length;
+  const maxDepth = indirectData.length ? Math.max(...indirectData.map(r => r.depth)) : 0;
+
+  document.getElementById('statDirect').textContent   = directData.length;
+  document.getElementById('statIndirect').textContent = indirectData.length;
+  document.getElementById('statTotal').textContent    = total;
+  document.getElementById('statDepth').textContent    = maxDepth ? `L${maxDepth}` : '—';
+  document.getElementById('statActive').textContent   = active;
+  document.getElementById('cntDirect').textContent    = directData.length;
+  document.getElementById('cntIndirect').textContent  = indirectData.length;
+}
+
+// ── Level chips ──
+function renderLevelChips() {
+  const levels = [...new Set(indirectData.map(r => r.depth))].sort((a,b) => a-b);
+  const chips = document.getElementById('levelChips');
+  chips.innerHTML = `<button class="chip active" data-level="all" onclick="setLevel('all', this)">All Levels</button>`
+    + levels.map(l =>
+        `<button class="chip" data-level="${l}" onclick="setLevel(${l}, this)">Level ${l}</button>`
+      ).join('');
+}
+
+function setLevel(level, el) {
+  activeLevel = String(level);
+  document.querySelectorAll('#levelChips .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  filterIndirect();
+}
+
+// ── Direct team render ──
+function renderDirect(rows) {
+  const tbody = document.getElementById('directBody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="icon">👥</div>No members match your search.</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map((r, i) => `
+    <tr>
+      <td style="color:var(--muted);font-size:12px">${i + 1}</td>
+      <td><strong>${escapeHtml(r.user_code)}</strong></td>
+      <td>${escapeHtml(r.name)}</td>
+      <td style="font-size:12.5px">${escapeHtml(r.email)}</td>
+      <td>${r.position || '—'}</td>
+      <td>${usdt(r.wallet_balance)}</td>
+      <td><span class="badge ${r.status === 'active' ? 'approved' : 'rejected'}">${escapeHtml(r.status)}</span></td>
+      <td style="font-size:12px">${new Date(r.created_at).toLocaleDateString()}</td>
+    </tr>
+  `).join('');
+  replayMotion('#directBody');
+}
+
+function filterDirect() {
+  const q = document.getElementById('searchDirect').value.trim().toLowerCase();
+  const filtered = q
+    ? directData.filter(r =>
+        (r.name || '').toLowerCase().includes(q) ||
+        (r.user_code || '').toLowerCase().includes(q) ||
+        (r.email || '').toLowerCase().includes(q)
+      )
+    : directData;
+  renderDirect(filtered);
+}
+
+// ── Indirect team render ──
+function renderIndirect(rows) {
+  const tbody = document.getElementById('indirectBody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="icon">🌐</div>No members match your filters.</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map((r, i) => `
+    <tr>
+      <td style="color:var(--muted);font-size:12px">${i + 1}</td>
+      <td><span class="level-badge">L${r.depth}</span></td>
+      <td><strong>${escapeHtml(r.user_code)}</strong></td>
+      <td>${escapeHtml(r.name)}</td>
+      <td style="font-size:12.5px">${escapeHtml(r.email)}</td>
+      <td class="sponsor-ref">${escapeHtml(r.sponsor_name || '—')}<br><span style="font-size:10.5px;color:var(--muted)">${escapeHtml(r.sponsor_code || '')}</span></td>
+      <td>${usdt(r.wallet_balance)}</td>
+      <td><span class="badge ${r.status === 'active' ? 'approved' : 'rejected'}">${escapeHtml(r.status)}</span></td>
+      <td style="font-size:12px">${new Date(r.created_at).toLocaleDateString()}</td>
+    </tr>
+  `).join('');
+  replayMotion('#indirectBody');
+}
+
+function filterIndirect() {
+  const q = document.getElementById('searchIndirect').value.trim().toLowerCase();
+  let filtered = indirectData;
+
+  if (activeLevel !== 'all') {
+    filtered = filtered.filter(r => String(r.depth) === activeLevel);
+  }
+  if (q) {
+    filtered = filtered.filter(r =>
+      (r.name || '').toLowerCase().includes(q) ||
+      (r.user_code || '').toLowerCase().includes(q) ||
+      (r.email || '').toLowerCase().includes(q) ||
+      (r.sponsor_name || '').toLowerCase().includes(q) ||
+      (r.sponsor_code || '').toLowerCase().includes(q)
+    );
+  }
+  renderIndirect(filtered);
+}
+
+// ── Load data ──
+async function loadAll() {
+  try {
+    [directData, indirectData] = await Promise.all([
+      apiRequest('/user/direct-team'),
+      apiRequest('/user/indirect-team')
+    ]);
+
+    renderStats();
+    renderDirect(directData);
+    renderLevelChips();
+
+    if (!indirectData.length) {
+      document.getElementById('indirectBody').innerHTML =
+        `<tr><td colspan="9"><div class="empty-state"><div class="icon">🌱</div>Your indirect team will appear here once your direct members refer others.</div></td></tr>`;
+    } else {
+      renderIndirect(indirectData);
+    }
+
+    if (!directData.length) {
+      document.getElementById('directBody').innerHTML =
+        `<tr><td colspan="8"><div class="empty-state"><div class="icon">👥</div>No direct referrals yet. Share your referral link to grow your team.</div></td></tr>`;
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+loadAll();
+</script>
+</body>
+</html>

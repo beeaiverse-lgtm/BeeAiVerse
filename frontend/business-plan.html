@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Business Plan - Bee AI Verse</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="css/style.css" />
+<style>
+  /* ============ BUSINESS PLAN PAGE — STATIC, ATTRACTIVE, CLASSY ============ */
+
+  .bp-hero {
+    position: relative;
+    border-radius: var(--radius);
+    padding: 40px 32px;
+    margin-bottom: 28px;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 18% 20%, rgba(255,201,60,0.16), transparent 55%),
+      radial-gradient(circle at 85% 80%, rgba(255,157,28,0.14), transparent 55%),
+      linear-gradient(145deg, var(--surface-solid), #1a1408 70%);
+    border: 1px solid var(--border-strong);
+    box-shadow: 0 18px 60px rgba(0,0,0,0.45);
+    text-align: center;
+  }
+  .bp-hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,193,7,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,193,7,0.05) 1px, transparent 1px);
+    background-size: 34px 34px;
+    -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 78%);
+            mask-image: radial-gradient(ellipse at center, #000 30%, transparent 78%);
+    pointer-events: none;
+  }
+  .bp-hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,201,60,0.1);
+    border: 1px solid var(--border-strong);
+    color: var(--ice);
+    font-size: 11.5px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+    padding: 6px 16px; border-radius: 30px;
+    position: relative; z-index: 1;
+    animation: bpFadeUp 0.7s ease both;
+  }
+  .bp-hero-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); box-shadow: 0 0 8px var(--success); animation: bpPulse 1.6s ease-in-out infinite; }
+  .bp-hero h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(26px, 4vw, 40px);
+    margin: 18px 0 10px;
+    position: relative; z-index: 1;
+    background: linear-gradient(90deg, #fff6e1, var(--ice) 55%, var(--accent2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: bpFadeUp 0.8s ease 0.05s both;
+  }
+  .bp-hero p {
+    color: var(--text-dim); font-size: 14.5px; max-width: 620px; margin: 0 auto;
+    position: relative; z-index: 1;
+    animation: bpFadeUp 0.9s ease 0.1s both;
+  }
+  .bp-hero-strip {
+    display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;
+    margin-top: 22px; position: relative; z-index: 1;
+  }
+  .bp-hero-strip span {
+    font-size: 12px; color: var(--text); background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border); padding: 6px 14px; border-radius: 30px;
+  }
+  .bp-hero-strip span b { color: var(--ice); }
+
+  @keyframes bpFadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes bpPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+  @keyframes bpFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  @keyframes bpShine { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+  @keyframes bpGrow { from { width: 0; } }
+  @keyframes bpFill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+  .bp-section-title {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 19px; margin: 0 0 4px;
+  }
+  .bp-section-title .num {
+    width: 30px; height: 30px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, var(--ice), var(--accent2)); color: var(--ink); font-weight: 800; font-size: 13px;
+    box-shadow: 0 4px 14px var(--ice-glow);
+  }
+  .bp-section-sub { color: var(--text-dim); font-size: 13px; margin: 6px 0 20px 40px; }
+
+  /* ---- Key metric grid ---- */
+  .bp-metric-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 16px;
+  }
+  .bp-metric {
+    position: relative; overflow: hidden;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 18px 18px 16px; transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+    opacity: 0; animation: bpFadeUp 0.6s ease forwards;
+  }
+  .bp-metric:hover { transform: translateY(-4px); border-color: var(--border-strong); box-shadow: 0 14px 34px rgba(0,0,0,0.35); }
+  .bp-metric .ic { font-size: 20px; display: inline-block; animation: bpFloat 3s ease-in-out infinite; }
+  .bp-metric .val { font-size: 24px; font-weight: 800; color: #fff; margin-top: 10px; font-family: 'Space Grotesk', sans-serif; }
+  .bp-metric .lbl { font-size: 12px; color: var(--text-dim); margin-top: 3px; text-transform: uppercase; letter-spacing: .5px; }
+  .bp-metric .bar { height: 4px; border-radius: 4px; background: rgba(255,255,255,0.06); margin-top: 14px; overflow: hidden; }
+  .bp-metric .bar i {
+    display: block; height: 100%; border-radius: 4px; transform-origin: left;
+    background: linear-gradient(90deg, var(--ice), var(--accent2));
+    animation: bpFill 1.1s cubic-bezier(.4,0,.2,1) both;
+  }
+
+  /* ---- Level income table (visual) ---- */
+  .bp-level-wrap { overflow-x: auto; margin-top: 18px; }
+  .bp-level-row { display: grid; grid-template-columns: 90px 1fr 80px; align-items: center; gap: 14px; padding: 9px 4px; border-bottom: 1px dashed var(--border); }
+  .bp-level-row:last-child { border-bottom: none; }
+  .bp-level-row .lv { font-family: 'Space Grotesk', sans-serif; font-weight: 700; color: var(--ice); font-size: 13px; }
+  .bp-level-row .track { height: 9px; border-radius: 6px; background: rgba(255,255,255,0.05); overflow: hidden; position: relative; }
+  .bp-level-row .fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--accent2), var(--ice)); transform-origin: left; animation: bpFill 1s ease both; }
+  .bp-level-row .pct { text-align: right; font-weight: 700; color: #fff; font-size: 13px; }
+  .bp-level-note { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+
+  /* ---- Rules / policy cards ---- */
+  .bp-rules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 6px; }
+  .bp-rule-card {
+    background: linear-gradient(160deg, rgba(255,255,255,0.035), rgba(255,255,255,0.01));
+    border: 1px solid var(--border); border-radius: 14px; padding: 18px;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .bp-rule-card .ric {
+    flex: 0 0 auto; width: 40px; height: 40px; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+    background: rgba(255,201,60,0.1); border: 1px solid var(--border-strong); color: var(--ice);
+  }
+  .bp-rule-card h4 { margin: 0 0 4px; font-size: 14.5px; color: #fff; }
+  .bp-rule-card p { margin: 0; font-size: 12.5px; color: var(--text-dim); line-height: 1.55; }
+  .bp-rule-card .tag {
+    display: inline-block; margin-top: 8px; font-size: 11px; font-weight: 700; color: var(--ink);
+    background: linear-gradient(90deg, var(--ice), var(--accent2)); padding: 2px 10px; border-radius: 20px;
+  }
+
+  /* ---- Flow / how it works ---- */
+  .bp-flow { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0; margin-top: 20px; position: relative; }
+  .bp-flow-step { position: relative; text-align: center; padding: 0 10px; }
+  .bp-flow-step .circ {
+    width: 54px; height: 54px; margin: 0 auto 10px; border-radius: 50%;
+    background: var(--surface-solid); border: 2px solid var(--border-strong);
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+    box-shadow: 0 0 0 6px rgba(255,201,60,0.05);
+  }
+  .bp-flow-step h5 { margin: 0 0 4px; font-size: 13px; color: #fff; }
+  .bp-flow-step p { margin: 0; font-size: 11.5px; color: var(--text-dim); line-height: 1.5; }
+  .bp-flow-step:not(:last-child)::after {
+    content: '';
+    position: absolute; top: 27px; left: 50%; width: 100%; height: 2px;
+    background: repeating-linear-gradient(90deg, var(--border-strong) 0 6px, transparent 6px 12px);
+    z-index: 0;
+  }
+
+  /* ---- Withdrawal schedule chip row ---- */
+  .bp-week { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+  .bp-week span {
+    flex: 1 1 60px; text-align: center; padding: 10px 6px; border-radius: 10px; font-size: 11.5px; font-weight: 600;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border); color: var(--text-dim);
+  }
+  .bp-week span.on {
+    background: linear-gradient(160deg, rgba(255,201,60,0.18), rgba(255,157,28,0.08));
+    border-color: var(--border-strong); color: var(--ice); box-shadow: 0 0 18px rgba(255,201,60,0.15);
+    animation: bpPulse 2.2s ease-in-out infinite;
+  }
+
+  /* ---- CTA footer ---- */
+  .bp-cta {
+    text-align: center; padding: 34px 20px; border-radius: var(--radius);
+    background: linear-gradient(135deg, rgba(255,201,60,0.14), rgba(255,157,28,0.06));
+    border: 1px solid var(--border-strong); margin-top: 6px;
+    position: relative; overflow: hidden;
+  }
+  .bp-cta::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(100deg, transparent 40%, rgba(255,255,255,0.10) 50%, transparent 60%);
+    background-size: 200% 100%; animation: bpShine 3.4s linear infinite;
+  }
+  .bp-cta h3 { position: relative; z-index: 1; font-family: 'Space Grotesk', sans-serif; font-size: 20px; margin: 0 0 8px; }
+  .bp-cta p { position: relative; z-index: 1; color: var(--text-dim); font-size: 13.5px; max-width: 480px; margin: 0 auto 18px; }
+  .bp-cta a.btn-primary { position: relative; z-index: 1; display: inline-block; text-decoration: none; padding: 12px 30px; }
+
+  .bp-disclaimer { font-size: 11px; color: var(--muted); text-align: center; margin-top: 14px; line-height: 1.6; }
+
+  @media (max-width: 760px) {
+    .bp-section-sub { margin-left: 0; }
+    .bp-hero { padding: 30px 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="app-layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main-content">
+
+    <!-- ================= HERO ================= -->
+    <div class="bp-hero">
+      <span class="bp-hero-badge"><span class="dot"></span> Official Business Plan</span>
+      <h1>Bee AI Verse — Business &amp; Income Plan</h1>
+      <p>A transparent, structured earning model built on deposits, AI-driven monthly returns, and a
+      25-level referral income system. Everything you need to understand how your money grows —
+      in one place.</p>
+      <div class="bp-hero-strip">
+        <span>💰 Monthly Return <b>≈ 6%</b></span>
+        <span>🔁 Weekly Withdrawals <b>Every Saturday</b></span>
+        <span>🌐 Level Income up to <b>L25</b></span>
+        <span>🔒 Min. ID Balance <b>200 USDT</b></span>
+      </div>
+    </div>
+
+    <!-- ================= KEY METRICS ================= -->
+    <div class="panel" style="background:transparent;border:none;box-shadow:none;padding:0;margin-bottom:26px">
+      <div class="bp-section-title"><span class="num">1</span> Plan at a Glance</div>
+      <div class="bp-section-sub">Core numbers that define every account on Bee AI Verse.</div>
+
+      <div class="bp-metric-grid">
+        <div class="bp-metric" style="animation-delay:.02s">
+          <span class="ic">📈</span>
+          <div class="val">~6% <span style="font-size:13px;color:var(--text-dim);font-weight:600">/ month</span></div>
+          <div class="lbl">Monthly ROI (approx.)</div>
+          <div class="bar"><i style="width:60%"></i></div>
+        </div>
+        <div class="bp-metric" style="animation-delay:.08s">
+          <span class="ic">🏦</span>
+          <div class="val">200 <span style="font-size:13px;color:var(--text-dim);font-weight:600">USDT</span></div>
+          <div class="lbl">Minimum ID Balance</div>
+          <div class="bar"><i style="width:35%"></i></div>
+        </div>
+        <div class="bp-metric" style="animation-delay:.14s">
+          <span class="ic">💳</span>
+          <div class="val">5% <span style="font-size:13px;color:var(--text-dim);font-weight:600">each way</span></div>
+          <div class="lbl">Deposit &amp; Withdrawal Fee</div>
+          <div class="bar"><i style="width:20%"></i></div>
+        </div>
+        <div class="bp-metric" style="animation-delay:.20s">
+          <span class="ic">📤</span>
+          <div class="val">10% <span style="font-size:13px;color:var(--text-dim);font-weight:600">/ month</span></div>
+          <div class="lbl">Monthly Wallet Withdrawal Limit</div>
+          <div class="bar"><i style="width:45%"></i></div>
+        </div>
+        <div class="bp-metric" style="animation-delay:.26s">
+          <span class="ic">📅</span>
+          <div class="val">Weekly</div>
+          <div class="lbl">Withdrawal Day — Saturday</div>
+          <div class="bar"><i style="width:80%"></i></div>
+        </div>
+        <div class="bp-metric" style="animation-delay:.32s">
+          <span class="ic">🎁</span>
+          <div class="val">No Limit</div>
+          <div class="lbl">Referral Wallet — Anytime Withdrawal</div>
+          <div class="bar"><i style="width:100%"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= WALLETS & FEES ================= -->
+    <div class="panel">
+      <div class="bp-section-title"><span class="num">2</span> Wallets, Fees &amp; Limits</div>
+      <div class="bp-section-sub">How your balance moves — and what governs it.</div>
+
+      <div class="bp-rules-grid">
+        <div class="bp-rule-card">
+          <div class="ric">💳</div>
+          <div>
+            <h4>Deposit Fee</h4>
+            <p>A flat 5% processing fee applies on every deposit made to your Main Wallet.</p>
+            <span class="tag">5% on Deposit</span>
+          </div>
+        </div>
+        <div class="bp-rule-card">
+          <div class="ric">📤</div>
+          <div>
+            <h4>Withdrawal Fee</h4>
+            <p>A flat 5% processing fee applies on every withdrawal request from your wallet.</p>
+            <span class="tag">5% on Withdrawal</span>
+          </div>
+        </div>
+        <div class="bp-rule-card">
+          <div class="ric">🏦</div>
+          <div>
+            <h4>Minimum ID Balance</h4>
+            <p>Every active ID must maintain a minimum balance of 200 USDT to stay eligible for
+            monthly returns and level income.</p>
+            <span class="tag">200 USDT Floor</span>
+          </div>
+        </div>
+        <div class="bp-rule-card">
+          <div class="ric">📈</div>
+          <div>
+            <h4>Monthly Return (ROI)</h4>
+            <p>Your invested capital grows at an approximate rate of 6% per month, credited to your
+            Main Wallet as AI-driven performance income.</p>
+            <span class="tag">≈ 6% / Month</span>
+          </div>
+        </div>
+        <div class="bp-rule-card">
+          <div class="ric">📊</div>
+          <div>
+            <h4>Monthly Withdrawal Limit</h4>
+            <p>You may withdraw up to 10% of your Main Wallet balance per month, keeping the system
+            sustainable for every member.</p>
+            <span class="tag">10% / Month Cap</span>
+          </div>
+        </div>
+        <div class="bp-rule-card">
+          <div class="ric">📅</div>
+          <div>
+            <h4>Withdrawal Day</h4>
+            <p>Main Wallet withdrawal requests are processed once a week, every Saturday.</p>
+            <span class="tag">Weekly · Saturday</span>
+          </div>
+        </div>
+        <div class="bp-rule-card">
+          <div class="ric">🎁</div>
+          <div>
+            <h4>Referral Wallet</h4>
+            <p>Direct referral earnings sit in a separate Referral Wallet with no withdrawal cap —
+            withdraw anytime, any day, no waiting for Saturday.</p>
+            <span class="tag">No Limit · Anytime</span>
+          </div>
+        </div>
+        <div class="bp-rule-card">
+          <div class="ric">🌐</div>
+          <div>
+            <h4>Level Income Source</h4>
+            <p>Level income is calculated on the ROI amount generated by your downline, not on their
+            deposit — a fair, performance-linked payout.</p>
+            <span class="tag">On ROI Amount</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= LEVEL INCOME ================= -->
+    <div class="panel">
+      <div class="bp-section-title"><span class="num">3</span> 25-Level Referral Income</div>
+      <div class="bp-section-sub">Earn a share of your entire downline's monthly ROI, 25 levels deep.</div>
+
+      <div class="bp-level-wrap">
+        <div class="bp-level-row" style="animation:bpFadeUp .5s ease .02s both">
+          <div class="lv">Level 1</div>
+          <div class="track"><div class="fill" style="width:100%"></div></div>
+          <div class="pct">10%</div>
+        </div>
+        <div class="bp-level-row" style="animation:bpFadeUp .5s ease .06s both">
+          <div class="lv">Level 2</div>
+          <div class="track"><div class="fill" style="width:80%"></div></div>
+          <div class="pct">8%</div>
+        </div>
+        <div class="bp-level-row" style="animation:bpFadeUp .5s ease .10s both">
+          <div class="lv">Level 3</div>
+          <div class="track"><div class="fill" style="width:60%"></div></div>
+          <div class="pct">6%</div>
+        </div>
+        <div class="bp-level-row" style="animation:bpFadeUp .5s ease .14s both">
+          <div class="lv">Level 4</div>
+          <div class="track"><div class="fill" style="width:20%"></div></div>
+          <div class="pct">2%</div>
+        </div>
+        <div class="bp-level-row" style="animation:bpFadeUp .5s ease .18s both">
+          <div class="lv">Level 5 – 25</div>
+          <div class="track"><div class="fill" style="width:10%"></div></div>
+          <div class="pct">1% <span style="color:var(--muted);font-weight:500">each</span></div>
+        </div>
+      </div>
+      <div class="bp-level-note">Each level's payout is a percentage of the monthly ROI earned by members at that level of your network — credited automatically to your Referral Wallet.</div>
+    </div>
+
+    <!-- ================= HOW IT WORKS ================= -->
+    <div class="panel">
+      <div class="bp-section-title"><span class="num">4</span> How The Cycle Works</div>
+      <div class="bp-section-sub">From deposit to payout, every 30 days.</div>
+
+      <div class="bp-flow">
+        <div class="bp-flow-step">
+          <div class="circ">💳</div>
+          <h5>1. Deposit</h5>
+          <p>Fund your Main Wallet (5% deposit fee applies). Balance must stay above 200 USDT.</p>
+        </div>
+        <div class="bp-flow-step">
+          <div class="circ">🤖</div>
+          <h5>2. AI Growth</h5>
+          <p>Your capital earns an approximate 6% monthly return, credited to your wallet.</p>
+        </div>
+        <div class="bp-flow-step">
+          <div class="circ">🌐</div>
+          <h5>3. Team Income</h5>
+          <p>Your upline earns Level Income (L1–L25) on your ROI, straight to their Referral Wallet.</p>
+        </div>
+        <div class="bp-flow-step">
+          <div class="circ">📤</div>
+          <h5>4. Withdraw</h5>
+          <p>Request up to 10% of wallet monthly (5% fee), paid out every Saturday.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= WITHDRAWAL SCHEDULE ================= -->
+    <div class="panel">
+      <div class="bp-section-title"><span class="num">5</span> Weekly Withdrawal Schedule</div>
+      <div class="bp-section-sub">Main Wallet payouts are batched once a week.</div>
+      <div class="bp-week">
+        <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span class="on">Sat ✓</span>
+      </div>
+      <div class="bp-level-note" style="margin-top:12px">Referral Wallet withdrawals are exempt from this schedule — they can be requested any day, with no monthly cap.</div>
+    </div>
+
+    <!-- ================= CTA ================= -->
+    <div class="bp-cta">
+      <h3>Grow With Bee AI Verse</h3>
+      <p>Deposit today to activate your AI-powered monthly returns and start building a 25-level
+      income network — transparent numbers, weekly payouts, no surprises.</p>
+      <a class="btn-primary" href="deposit.html">Make a Deposit</a>
+    </div>
+
+    <div class="bp-disclaimer">
+      Figures shown (≈6% monthly return, fees, limits) are current platform parameters and may be
+      revised. This page is for informational purposes and does not constitute investment or
+      financial advice — see <a href="terms.html" style="color:var(--ice)">Terms &amp; Conditions</a> for full details.
+    </div>
+
+  </div><!-- .main-content -->
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/sidebar.js"></script>
+<script>
+requireAuth();
+renderSidebar('business-plan', 'user');
+</script>
+</body>
+</html>

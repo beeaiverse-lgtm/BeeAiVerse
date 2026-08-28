@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Can't Login? - Bee AI Verse Support</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="css/style.css" />
+<style>
+  .guest-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 18px 0 22px;
+  }
+  .guest-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: rgba(255,201,60,0.06);
+    border: 1px solid rgba(255,201,60,0.18);
+    border-radius: 10px;
+    padding: 12px 14px;
+    text-align: left;
+  }
+  .guest-step-num {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(255,201,60,0.18);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .guest-step-text {
+    font-size: 13.5px;
+    color: var(--text-dim);
+    line-height: 1.55;
+  }
+  .guest-step-text strong { color: var(--ice); }
+  .ticket-type-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .type-btn {
+    background: rgba(255,255,255,0.04);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.2s, background 0.2s;
+    color: var(--text-dim);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .type-btn:hover { border-color: var(--accent); background: rgba(255,201,60,0.07); }
+  .type-btn.selected {
+    border-color: var(--accent);
+    background: rgba(255,201,60,0.12);
+    color: var(--ice);
+  }
+  .type-btn .emoji { font-size: 18px; display: block; margin-bottom: 4px; }
+  .success-box {
+    background: rgba(0,200,100,0.08);
+    border: 1px solid rgba(0,200,100,0.3);
+    border-radius: 12px;
+    padding: 22px 24px;
+    text-align: center;
+    display: none;
+  }
+  .success-box .tick { font-size: 40px; margin-bottom: 10px; }
+  .success-box h3 { color: #00c870; margin: 0 0 8px; font-size: 18px; }
+  .success-box p { color: var(--text-dim); font-size: 13.5px; margin: 0 0 6px; }
+  .success-box .token-badge {
+    display: inline-block;
+    margin: 10px 0;
+    background: rgba(255,201,60,0.15);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: 0.08em;
+    padding: 6px 18px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,201,60,0.3);
+  }
+  .divider-or {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .divider-or::before, .divider-or::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .self-help-links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .self-help-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.03);
+    text-decoration: none;
+    color: var(--text-dim);
+    font-size: 13.5px;
+    transition: border-color 0.18s, background 0.18s;
+  }
+  .self-help-link:hover {
+    border-color: var(--accent);
+    background: rgba(255,201,60,0.07);
+    color: var(--ice);
+  }
+  .self-help-link .icon { font-size: 18px; flex-shrink: 0; }
+  .wide-auth { max-width: 680px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 560px) {
+    .two-col { grid-template-columns: 1fr; }
+    .ticket-type-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="auth-page-wrap">
+  <div class="auth-shell wide-auth">
+    <div class="auth-eyebrow"><span class="pulse-dot"></span> Can't Login? We've Got You</div>
+
+    <div class="auth-bot">
+      <!-- lock icon -->
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="5" y="11" width="14" height="10" rx="2" stroke="#ffc93c" stroke-width="1.5"/>
+        <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="#ffc93c" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="12" cy="16" r="1.5" fill="#ffc93c"/>
+        <path d="M12 17.5v2" stroke="#ffc93c" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <div class="auth-border-glow">
+      <div class="auth-box" style="max-width:660px">
+
+        <!-- ── SUCCESS STATE ── -->
+        <div class="success-box" id="successBox">
+          <div class="tick">✅</div>
+          <h3>Ticket Submitted!</h3>
+          <p>Your support ticket has been created. Note your token below — our team will contact you at the email you provided.</p>
+          <div class="token-badge" id="successToken">—</div>
+          <p style="margin-top:12px;font-size:12.5px;color:var(--muted)">Once your account is restored you can track it in the Support section of your dashboard.</p>
+          <a href="login.html" class="btn-primary" style="display:block;text-align:center;text-decoration:none;margin-top:18px">Back to Login</a>
+        </div>
+
+        <!-- ── SELF-HELP FIRST ── -->
+        <div id="mainContent">
+          <h2 style="margin-bottom:4px">Account Access Help</h2>
+          <p class="auth-subtitle">Try these steps first — if they don't work, raise a ticket below.</p>
+
+          <div class="self-help-links" style="margin-top:18px;margin-bottom:4px">
+            <a href="forgot-password.html" class="self-help-link">
+              <span class="icon">🔑</span>
+              <div>
+                <div style="font-weight:600;color:var(--ice)">Forgot password?</div>
+                <div style="font-size:12px;margin-top:2px">See how to reset it using Google Authenticator</div>
+              </div>
+            </a>
+            <a href="login.html" class="self-help-link">
+              <span class="icon">🔄</span>
+              <div>
+                <div style="font-weight:600;color:var(--ice)">Try logging in again</div>
+                <div style="font-size:12px;margin-top:2px">Check Caps Lock, spaces, and use your BAV ID or email</div>
+              </div>
+            </a>
+          </div>
+
+          <div class="divider-or">Still stuck? Raise a support ticket</div>
+
+          <!-- ── TICKET FORM ── -->
+          <div id="ticketSection">
+            <!-- Issue type selection -->
+            <label style="margin-bottom:8px;display:block">What's the problem?</label>
+            <div class="ticket-type-grid" id="typeGrid">
+              <button type="button" class="type-btn selected" data-type="cant_login">
+                <span class="emoji">🚫</span>Can't log in at all
+              </button>
+              <button type="button" class="type-btn" data-type="lost_2fa">
+                <span class="emoji">📵</span>Lost Google Authenticator / 2FA
+              </button>
+              <button type="button" class="type-btn" data-type="forgot_password">
+                <span class="emoji">🔑</span>Forgot my password
+              </button>
+              <button type="button" class="type-btn" data-type="account_blocked">
+                <span class="emoji">🔒</span>Account blocked / suspended
+              </button>
+              <button type="button" class="type-btn" data-type="other" style="grid-column:1/-1">
+                <span class="emoji">💬</span>Other login issue
+              </button>
+            </div>
+
+            <div class="two-col">
+              <div>
+                <label>Your Name</label>
+                <input type="text" id="guestName" placeholder="Full name" autocomplete="name" />
+              </div>
+              <div>
+                <label>Your Email <span style="color:var(--accent)">*</span></label>
+                <input type="email" id="guestEmail" placeholder="we'll reply here" autocomplete="email" />
+              </div>
+            </div>
+
+            <label>Your Bee AI Verse ID or registered email <span style="color:var(--muted);font-size:12px">(helps us find your account)</span></label>
+            <input type="text" id="guestHint" placeholder="e.g. BAV1234 or user@email.com" style="text-transform:uppercase" />
+
+            <label>Subject</label>
+            <input type="text" id="subject" placeholder="Briefly describe the issue" />
+
+            <label>Message</label>
+            <textarea id="message" rows="4" placeholder="Tell us exactly what happens when you try to log in — error messages, when it started, anything relevant…"></textarea>
+
+            <div id="formMsg" class="msg" style="margin-top:8px"></div>
+
+            <button type="button" class="btn-primary" id="submitBtn" style="margin-top:16px;width:100%" onclick="submitGuestTicket()">
+              Submit Support Ticket
+            </button>
+
+            <div style="text-align:center;margin-top:14px">
+              <a href="login.html" style="font-size:12.5px;color:var(--muted)">← Back to Login</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="auth-footnote">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2l7 4v6c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6l7-4z" stroke="currentColor" stroke-width="1.6"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+  let selectedType = 'cant_login';
+
+  // Type button selection
+  document.querySelectorAll('.type-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedType = btn.dataset.type;
+    });
+  });
+
+  // Auto-uppercase BAV hint field
+  document.getElementById('guestHint').addEventListener('input', function() {
+    const val = this.value;
+    // Only uppercase if it looks like a BAV code, not an email
+    if (!val.includes('@')) this.value = val.toUpperCase();
+  });
+
+  async function submitGuestTicket() {
+    const btn    = document.getElementById('submitBtn');
+    const msgEl  = document.getElementById('formMsg');
+    msgEl.textContent = '';
+    msgEl.className   = 'msg';
+
+    const name    = document.getElementById('guestName').value.trim();
+    const email   = document.getElementById('guestEmail').value.trim();
+    const hint    = document.getElementById('guestHint').value.trim();
+    const subject = document.getElementById('subject').value.trim();
+    const message = document.getElementById('message').value.trim();
+
+    if (!name)    { msgEl.textContent = 'Please enter your name.'; msgEl.className = 'msg error'; return; }
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      msgEl.textContent = 'Please enter a valid email address.';
+      msgEl.className = 'msg error'; return;
+    }
+    if (!subject) { msgEl.textContent = 'Please fill in the subject.'; msgEl.className = 'msg error'; return; }
+    if (!message) { msgEl.textContent = 'Please describe your issue in the message.'; msgEl.className = 'msg error'; return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+
+    try {
+      const res = await apiRequest('/auth/guest-support', 'POST', {
+        guest_name:          name,
+        guest_email:         email,
+        guest_user_id_hint:  hint,
+        ticket_type:         selectedType,
+        subject,
+        message
+      });
+
+      // Show success state
+      document.getElementById('successToken').textContent = res.ticketNo;
+      document.getElementById('successBox').style.display   = 'block';
+      document.getElementById('mainContent').style.display  = 'none';
+
+    } catch (err) {
+      msgEl.textContent = err.message || 'Something went wrong. Please try again.';
+      msgEl.className   = 'msg error';
+      btn.disabled      = false;
+      btn.textContent   = 'Submit Support Ticket';
+    }
+  }
+</script>
+</body>
+</html>

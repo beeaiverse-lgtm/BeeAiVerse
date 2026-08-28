@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Deposits - Bee AI Verse Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="css/style.css" />
+<style>
+  .txn-panel {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    background: rgba(255,255,255,0.025);
+    margin-top: 0;
+  }
+  .txn-panel h3 { margin: 0 0 14px; font-size: 15px; }
+  .txn-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 13px;
+  }
+  .txn-row:last-child { border-bottom: none; }
+  .txn-label { color: var(--muted); min-width: 160px; flex-shrink: 0; }
+  .txn-value { word-break: break-all; font-family: monospace; font-size: 12.5px; }
+  .txn-value.mono-lg { font-size: 13.5px; }
+  .pill-ok   { background: rgba(0,200,80,0.15); color: #00d060; padding: 2px 9px; border-radius: 20px; font-size: 12px; font-weight:700; }
+  .pill-warn { background: rgba(255,160,0,0.15); color: #ffaa00; padding: 2px 9px; border-radius: 20px; font-size: 12px; font-weight:700; }
+  .pill-bad  { background: rgba(255,60,60,0.15);  color: #ff5050; padding: 2px 9px; border-radius: 20px; font-size: 12px; font-weight:700; }
+  .check-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:16px; }
+  .addr-match    { color: #00d060; font-size:11px; margin-left:6px; }
+  .addr-mismatch { color: #ff5050; font-size:11px; margin-left:6px; }
+  .txn-skeleton  { color: var(--muted); font-size:13px; padding:10px 0; }
+</style>
+</head>
+<body>
+<div class="app-layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main-content">
+    <div class="page-header">
+      <h1>Deposit Requests</h1>
+      <p>Click <strong>Check Txn</strong> on any pending deposit to verify it on BSCScan, then approve or reject manually.</p>
+    </div>
+
+    <!-- Inline Transaction Checker Panel -->
+    <div class="panel txn-panel" id="checkerPanel" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:4px">
+        <h3 style="margin:0">🔍 Transaction Check</h3>
+        <button onclick="closeChecker()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1">✕</button>
+      </div>
+      <div id="checkerBody"><div class="txn-skeleton">Loading transaction data…</div></div>
+    </div>
+
+    <div class="panel" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <input type="text" id="depositSearch" placeholder="Filter by User ID, name, or email..." style="flex:1;min-width:220px;margin:0" />
+    </div>
+
+    <div class="panel">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>User ID</th>
+            <th>User</th>
+            <th>Amount (USDT)</th>
+            <th>Method</th>
+            <th>Txn Hash</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="depositsBody"><tr><td colspan="8">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/sidebar.js"></script>
+<script>
+requireAdmin();
+renderSidebar('deposits', 'admin');
+
+let allDeposits = [];
+let activeCheckId = null;
+
+function shortHash(hash) {
+  if (!hash || hash.length < 16) return hash || '-';
+  return hash.slice(0, 8) + '…' + hash.slice(-6);
+}
+
+function renderDeposits(rows) {
+  document.getElementById('depositsBody').innerHTML = rows.map(d => `
+    <tr id="dep-row-${d.id}" ${activeCheckId === d.id ? 'style="background:rgba(100,180,255,0.06)"' : ''}>
+      <td>${new Date(d.created_at).toLocaleString()}</td>
+      <td><a href="beeadmin-user-transactions.html?id=${d.user_id}" style="color:var(--ice);font-weight:700;text-decoration:none">${escapeHtml(d.user_code || '-')}</a></td>
+      <td>${escapeHtml(d.user_name)}<br><small style="color:var(--text-dim)">${escapeHtml(d.user_email)}</small></td>
+      <td style="font-weight:700">${usdt(d.amount)}</td>
+      <td>${escapeHtml(d.method)}</td>
+      <td style="font-family:monospace;font-size:12px" title="${escapeHtml(d.txn_ref || '')}">${escapeHtml(shortHash(d.txn_ref))}</td>
+      <td><span class="badge ${d.status}">${d.status}</span></td>
+      <td>
+        ${d.status === 'pending' ? `
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn-small" style="background:#1a5a8a;color:#fff" onclick="checkTxn(${d.id})">🔍 Check</button>
+            <button class="btn-small btn-success" onclick="approveDeposit(${d.id})">✓ Approve</button>
+            <button class="btn-small btn-danger"  onclick="rejectDeposit(${d.id})">✕ Reject</button>
+          </div>
+        ` : (d.remarks || '-')}
+      </td>
+    </tr>
+  `).join('') || '<tr><td colspan="8" style="color:var(--muted)">No deposit requests</td></tr>';
+  replayMotion('#depositsBody');
+}
+
+document.getElementById('depositSearch').addEventListener('input', (e) => {
+  const q = e.target.value.trim().toLowerCase();
+  if (!q) return renderDeposits(allDeposits);
+  renderDeposits(allDeposits.filter(d =>
+    (d.user_code || '').toLowerCase().includes(q) ||
+    (d.user_name || '').toLowerCase().includes(q) ||
+    (d.user_email || '').toLowerCase().includes(q) ||
+    (d.txn_ref || '').toLowerCase().includes(q)
+  ));
+});
+
+async function loadDeposits() {
+  allDeposits = await apiRequest('/admin/deposits');
+  renderDeposits(allDeposits);
+}
+
+// -------- TRANSACTION CHECKER --------
+
+function closeChecker() {
+  activeCheckId = null;
+  document.getElementById('checkerPanel').style.display = 'none';
+  renderDeposits(allDeposits.filter(d => {
+    const q = document.getElementById('depositSearch').value.trim().toLowerCase();
+    return !q ||
+      (d.user_code || '').toLowerCase().includes(q) ||
+      (d.user_name || '').toLowerCase().includes(q) ||
+      (d.user_email || '').toLowerCase().includes(q) ||
+      (d.txn_ref || '').toLowerCase().includes(q);
+  }));
+}
+
+async function checkTxn(id) {
+  activeCheckId = id;
+  const panel = document.getElementById('checkerPanel');
+  const body  = document.getElementById('checkerBody');
+
+  panel.style.display = 'block';
+  body.innerHTML = '<div class="txn-skeleton">⏳ Fetching transaction from BSCScan…</div>';
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  // Highlight the row being checked
+  renderDeposits(allDeposits);
+
+  const dep = allDeposits.find(d => d.id === id);
+
+  try {
+    const data = await apiRequest(`/admin/deposits/${id}/check-txn`);
+    renderCheckerResult(data, dep);
+  } catch (err) {
+    body.innerHTML = `
+      <div style="color:#ff5050;font-size:13px;margin-bottom:12px">⚠️ ${escapeHtml(err.message)}</div>
+      ${dep?.txn_ref ? `<a href="https://bscscan.com/tx/${encodeURIComponent(dep.txn_ref)}" target="_blank" rel="noopener" class="btn-small btn-primary">Open on BSCScan ↗</a>` : ''}
+    `;
+  }
+}
+
+function renderCheckerResult(data, dep) {
+  const body = document.getElementById('checkerBody');
+
+  // ---- Status pill ----
+  let statusPill;
+  if (data.txSuccess === true)       statusPill = `<span class="pill-ok">✓ Confirmed on-chain</span>`;
+  else if (data.txSuccess === false)  statusPill = `<span class="pill-bad">✗ Transaction FAILED</span>`;
+  else                                statusPill = `<span class="pill-warn">? Status unknown</span>`;
+
+  // ---- Amount comparison ----
+  const amt      = data.usdtAmount != null ? data.usdtAmount.toFixed(2) : null;
+  const reqAmt   = dep?.amount ? parseFloat(dep.amount).toFixed(2) : null;
+  let amtPill = '';
+  if (amt !== null && reqAmt !== null) {
+    const diff = Math.abs(parseFloat(amt) - parseFloat(reqAmt));
+    if (diff < 0.01)      amtPill = `<span class="pill-ok" style="margin-left:8px">Matches requested</span>`;
+    else if (diff < 1)    amtPill = `<span class="pill-warn" style="margin-left:8px">Slight difference (${diff.toFixed(2)} USDT)</span>`;
+    else                  amtPill = `<span class="pill-bad" style="margin-left:8px">Amount mismatch — requested ${reqAmt} USDT</span>`;
+  }
+
+  // ---- Recipient address check ----
+  let addrTag = '';
+  if (data.isToOurWallet === true)        addrTag = `<span class="addr-match">✓ Our deposit address</span>`;
+  else if (data.isToOurWallet === false)  addrTag = `<span class="addr-mismatch">✗ DIFFERENT from our deposit address</span>`;
+
+  // ---- Time ----
+  const timeStr = data.blockTime ? new Date(data.blockTime).toLocaleString() : '—';
+
+  body.innerHTML = `
+    <div class="txn-row">
+      <span class="txn-label">Deposit request</span>
+      <span class="txn-value" style="color:var(--ice);font-size:13px;font-family:sans-serif">
+        #${dep?.id} — ${escapeHtml(dep?.user_code || '')} — ${dep ? usdt(dep.amount) : ''}
+      </span>
+    </div>
+    <div class="txn-row">
+      <span class="txn-label">On-chain status</span>
+      <span class="txn-value">${statusPill}</span>
+    </div>
+    ${data.blockTime ? `
+    <div class="txn-row">
+      <span class="txn-label">Block timestamp</span>
+      <span class="txn-value">${escapeHtml(timeStr)}</span>
+    </div>` : ''}
+    ${data.tokenSymbol ? `
+    <div class="txn-row">
+      <span class="txn-label">Token transferred</span>
+      <span class="txn-value">${escapeHtml(data.tokenSymbol)} (BEP20 USDT)</span>
+    </div>` : ''}
+    ${amt !== null ? `
+    <div class="txn-row">
+      <span class="txn-label">Amount transferred</span>
+      <span class="txn-value mono-lg"><strong>${amt} USDT</strong>${amtPill}</span>
+    </div>` : `
+    <div class="txn-row">
+      <span class="txn-label">Amount transferred</span>
+      <span class="txn-value"><span class="pill-warn">No USDT BEP20 transfer found in this tx</span></span>
+    </div>`}
+    ${data.fromAddress ? `
+    <div class="txn-row">
+      <span class="txn-label">Sent from</span>
+      <span class="txn-value">
+        ${escapeHtml(data.fromAddress)}
+        <a href="https://bscscan.com/address/${encodeURIComponent(data.fromAddress)}" target="_blank" rel="noopener" style="color:var(--ice);margin-left:6px;font-size:11px">↗</a>
+      </span>
+    </div>` : ''}
+    ${data.toAddress ? `
+    <div class="txn-row">
+      <span class="txn-label">Sent to</span>
+      <span class="txn-value">
+        ${escapeHtml(data.toAddress)}${addrTag}
+        <a href="https://bscscan.com/address/${encodeURIComponent(data.toAddress)}" target="_blank" rel="noopener" style="color:var(--ice);margin-left:6px;font-size:11px">↗</a>
+      </span>
+    </div>` : ''}
+    ${data.depositAddress ? `
+    <div class="txn-row">
+      <span class="txn-label">Our BEP20 address</span>
+      <span class="txn-value" style="color:var(--muted)">${escapeHtml(data.depositAddress)}</span>
+    </div>` : ''}
+    <div class="txn-row">
+      <span class="txn-label">Txn hash</span>
+      <span class="txn-value">
+        ${escapeHtml(data.txHash)}
+        <a href="${escapeHtml(data.bscscanUrl)}" target="_blank" rel="noopener" style="color:var(--ice);margin-left:6px;font-size:11px">Open on BSCScan ↗</a>
+      </span>
+    </div>
+
+    <div class="check-actions">
+      ${dep?.status === 'pending' ? `
+        <button class="btn-primary" style="background:#1a6b2e" onclick="approveDeposit(${dep.id})">✓ Approve Deposit</button>
+        <button class="btn-primary" style="background:#a33"    onclick="rejectDeposit(${dep.id})">✕ Reject Deposit</button>
+      ` : ''}
+      <a href="${escapeHtml(data.bscscanUrl)}" target="_blank" rel="noopener" class="btn-primary" style="background:#2255aa;text-decoration:none">Open Full BSCScan Page ↗</a>
+    </div>
+  `;
+}
+
+// -------- APPROVE / REJECT --------
+
+async function approveDeposit(id) {
+  if (!confirm('Approve this deposit?')) return;
+  try {
+    await apiRequest(`/admin/deposits/${id}/approve`, 'PUT');
+    toast('Deposit approved');
+    if (activeCheckId === id) closeChecker();
+    loadDeposits();
+  } catch (err) {
+    toast(err.message, 'error');
+  }
+}
+
+async function rejectDeposit(id) {
+  const reason = prompt('Reason for rejection (optional):') ?? null;
+  if (reason === null) return; // cancelled
+  try {
+    await apiRequest(`/admin/deposits/${id}/reject`, 'PUT', { remarks: reason });
+    toast('Deposit rejected');
+    if (activeCheckId === id) closeChecker();
+    loadDeposits();
+  } catch (err) {
+    toast(err.message, 'error');
+  }
+}
+
+loadDeposits();
+</script>
+</body>
+</html>
